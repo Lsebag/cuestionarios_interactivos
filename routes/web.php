@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\QuizController;
 use App\Http\Middleware\IsTeacher;
 use Illuminate\Support\Facades\Route;
@@ -34,5 +35,7 @@ Route::middleware(['auth', IsTeacher::class])->prefix('teacher')->group(function
     Route::get('/quizzes/{quiz}/edit', [QuizController::class, 'edit'])->name('teacher.quizzes.edit');
     Route::put('/quizzes/{quiz}', [QuizController::class, 'update'])->name('teacher.quizzes.update');
 });
+
+Route::get('/student/dashboard', [StudentController::class, 'index'])->name('student.dashboard');
 
 require __DIR__.'/auth.php';
