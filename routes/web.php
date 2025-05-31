@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\QuizController;
 use App\Http\Middleware\IsTeacher;
 use Illuminate\Support\Facades\Route;
@@ -34,6 +35,9 @@ Route::middleware(['auth', IsTeacher::class])->prefix('teacher')->group(function
     Route::post('/quizzes', [QuizController::class, 'store'])->name('teacher.quizzes.store');
     Route::get('/quizzes/{quiz}/edit', [QuizController::class, 'edit'])->name('teacher.quizzes.edit');
     Route::put('/quizzes/{quiz}', [QuizController::class, 'update'])->name('teacher.quizzes.update');
+
+    // Ruta para importar preguntas
+    Route::get('/quizzes/{quiz}/questions/import', [QuestionController::class, 'import'])->name('teacher.questions.import');
 });
 
 Route::get('/student/dashboard', [StudentController::class, 'index'])->name('student.dashboard');
