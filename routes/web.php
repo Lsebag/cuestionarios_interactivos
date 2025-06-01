@@ -38,6 +38,10 @@ Route::middleware(['auth', IsTeacher::class])->prefix('teacher')->group(function
 
     // Ruta para importar preguntas
     Route::get('/quizzes/{quiz}/questions/import', [QuestionController::class, 'import'])->name('teacher.questions.import');
+
+    Route::post('/quizzes/{quiz}/questions/import', [QuestionController::class, 'storeImport'])->name('teacher.questions.storeImport');
+    Route::get('/quizzes/{quiz}/questions', [QuestionController::class, 'showByQuiz'])->name('teacher.questions.showByQuiz');
+
 });
 
 Route::get('/student/dashboard', [StudentController::class, 'index'])->name('student.dashboard');

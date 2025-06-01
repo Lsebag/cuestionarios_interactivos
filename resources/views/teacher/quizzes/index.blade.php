@@ -14,8 +14,11 @@
                     <h3 class="text-lg font-semibold">{{ $quiz->title }}</h3>
                     <p class="text-gray-600">{{ $quiz->description }}</p>
                     <div class="mt-3">
-                        <a href="{{ route('teacher.quizzes.edit', $quiz) }}" class="btn btn-warning btn-sm">Editar</a>
-                        <a href="{{ route('teacher.questions.import', $quiz) }}" class="btn btn-info btn-sm">Cargar Preguntas</a>
+                        <div class="mt-3">
+                            <a href="{{ route('teacher.quizzes.edit', $quiz) }}" class="btn btn-warning btn-sm">Editar</a>
+                            <a href="{{ route('teacher.questions.import', $quiz) }}" class="btn btn-info btn-sm">Cargar Preguntas</a>
+                            <a href="{{ route('teacher.questions.showByQuiz', $quiz) }}" class="btn btn-outline-primary btn-sm">Ver Preguntas</a>
+                        </div>                        
                     </div>
                 </div>
             @endforeach
