@@ -18,7 +18,7 @@
                 <p>No has participado en ninguna sesión todavía.</p>
             @endforelse
 
-            <a href="{{ route('student.joinMeetingForm') }}" class="btn btn-primary mt-4">Unirse a una sesión</a>
+            <a href="{{ route('student.join') }}" class="btn btn-primary mt-4">Unirse a una sesión</a>
         </div>
     </div>
 </x-app-layout>

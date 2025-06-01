@@ -5,6 +5,7 @@ use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\MeetingController;
+use App\Http\Controllers\AnswerController;
 use App\Http\Controllers\QuizController;
 use App\Http\Middleware\IsTeacher;
 use Illuminate\Http\Request;
@@ -49,17 +50,28 @@ Route::middleware(['auth', IsTeacher::class])->prefix('teacher')->group(function
     Route::get('/meetings/create', [MeetingController::class, 'create'])->name('teacher.meetings.create');
     Route::get('/meetings/{id}', [MeetingController::class, 'show'])->name('teacher.meetings.show');
     Route::post('/teacher/meetings', [MeetingController::class, 'store'])->name('teacher.meetings.store');
+    Route::post('/meetings/{meeting}/start', [MeetingController::class, 'start'])->name('teacher.meetings.start');
+
 });
 
 Route::get('/student/dashboard', [StudentController::class, 'index'])->name('student.dashboard');
 Route::get('/student/meetings', [StudentController::class, 'showMeetings'])->name('student.meetings');
+Route::post('/answer', [AnswerController::class, 'store'])->name('answer.store');
 
-// Ruta unirse a sesión
-Route::get('/student/join', function () {
-    return view('student.meetings.join');
-})->name('student.joinMeetingForm');
+// Rutas unirse a sesión
+// 1. Mostrar el formulario para ingresar código de sesión
+Route::get('/student/meetings/join', [MeetingController::class, 'joinView'])->name('student.joinMeetingForm');
 
-Route::post('/student/join', [MeetingController::class, 'handleJoin'])->name('student.joinMeeting');
+// 2. Procesar formulario y redirigir
+Route::post('/student/meetings/join', [MeetingController::class, 'handleJoin'])->name('student.join');
+
+// 3. Esperar a que comience la sesión
+Route::get('/student/meetings/join/{access_code}', [MeetingController::class, 'join'])->name('student.meetings.join');
+
+// 4. Cuando el profesor inicia, empieza el quiz
+Route::get('/student/meetings/play/{access_code}', [MeetingController::class, 'play'])
+    ->middleware('auth')
+    ->name('student.meetings.play');
 
 
 require __DIR__.'/auth.php';

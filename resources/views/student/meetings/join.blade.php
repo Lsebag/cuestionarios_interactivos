@@ -7,16 +7,17 @@
 
     <div class="py-12">
         <div class="max-w-md mx-auto sm:px-6 lg:px-8">
-            <form method="POST" action="{{ route('student.joinMeeting') }}">
+            <form method="POST" action="{{ route('student.join') }}">
                 @csrf
-
-                <div class="mb-4">
-                    <label for="access_code" class="block text-sm font-medium text-gray-700">Código de acceso</label>
-                    <input type="text" name="access_code" id="access_code" class="form-input mt-1 block w-full" required>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Unirse</button>
+                <label class="block mb-2">
+                    Código de acceso:
+                    <input type="text" name="access_code" class="border rounded w-full p-2 mt-1" required>
+                </label>
+                <button type="submit" class="btn btn-primary rounded">
+                    Unirse
+                </button>
             </form>
         </div>
     </div>
+
 </x-app-layout>

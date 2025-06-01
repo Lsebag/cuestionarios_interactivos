@@ -44,7 +44,10 @@ class MeetingController extends Controller
 
     public function show($id)
     {
-        $meeting = Meeting::with('quiz')->where('user_id', Auth::id())->findOrFail($id);
+        $meeting = Meeting::with([
+            'quiz.questions.options',
+            // 'participants.user' // si quieres mostrar participantes
+        ])->where('user_id', Auth::id())->findOrFail($id);
         return view('teacher.meetings.show', compact('meeting'));
     }
     
@@ -63,8 +66,45 @@ class MeetingController extends Controller
         ], [
             'status' => 'joined',
         ]);
-    
-        return redirect()->route('meeting.join', $meeting->access_code);
+        return redirect()->route('student.meetings.join', ['access_code' => $meeting->access_code]);
     }
-    
+
+    public function start(Meeting $meeting)
+    {
+        // $this->authorize('update', $meeting); // Opcional, si usas políticas
+
+        $meeting->update(['status' => 'started']);
+
+        broadcast(new \App\Events\MeetingStarted($meeting))->toOthers();
+
+        return redirect()->route('teacher.meetings.show', $meeting)
+            ->with('success', 'Sesión iniciada');
+    }
+
+    public function join($code)
+    {
+        $meeting = Meeting::where('access_code', $code)->with('quiz.questions.options')->firstOrFail();
+
+        return view('student.meetings.waiting-room', compact('meeting'));
+    }
+
+    public function joinView()
+    {
+        return view('student.meetings.join');
+    }
+
+    public function play($access_code)
+    {
+        $meeting = Meeting::with('quiz.questions.options')->where('access_code', $access_code)->firstOrFail();
+
+        $participation = Participation::where('user_id', Auth::id())
+            ->where('meeting_id', $meeting->id)
+            ->firstOrFail();
+
+        if ($meeting->status !== 'started') {
+            return redirect()->route('student.join')->with('error', 'La sesión aún no ha comenzado.');
+        }
+
+        return view('student.meetings.play', compact('meeting'));
+    }
 }
