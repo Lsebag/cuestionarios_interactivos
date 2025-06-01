@@ -13,7 +13,7 @@
                         <a href="{{ route('teacher.quizzes.index') }}" class="btn btn-primary">Cuestionarios</a>
                     </div>
                     <div class="mt-4">
-                        <a href="#" class="btn btn-secondary">Sesiones</a> {{-- Agrega la ruta cuando implementes sesiones --}}
+                        <a href="{{ route('teacher.meetings.index') }}" class="btn btn-secondary">Sesiones</a>
                     </div>
                 </div>
             </div>

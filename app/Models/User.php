@@ -5,6 +5,8 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
@@ -51,5 +53,24 @@ class User extends Authenticatable
     public function hasRole($role)
     {
         return $this->role === $role;
+    }
+
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('participations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('meeting_id')->constrained()->onDelete('cascade');
+            $table->enum('status', ['joined', 'left'])->default('joined');
+            $table->timestamps();
+        });
+    }
+
+    public function meetings()
+    {
+        return $this->belongsToMany(Meeting::class, 'participations')->withTimestamps()->withPivot('status');
     }
 }
