@@ -17,7 +17,11 @@
                     Unirse
                 </button>
             </form>
+            @if (session('error'))
+                <div class="mb-4 p-3 bg-red-100 text-red-700 rounded shadow">
+                    {{ session('error') }}
+                </div>
+            @endif
         </div>
     </div>
-
 </x-app-layout>

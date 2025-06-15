@@ -16,39 +16,35 @@ class QuestionController extends Controller
     
         $file = $request->file('gift_file');
         $content = file_get_contents($file->getRealPath());
-    
-        // GIFT básico: solo soportaremos 4 preguntas tipo opción múltiple con una correcta entre llaves: {=correcta ~incorrecta ~incorrecta ~incorrecta}
-        $questionsParsed = [];
-    
+
         preg_match_all('/^(.*?)\{(.*?)\}/ms', $content, $matches, PREG_SET_ORDER);
     
         foreach ($matches as $match) {
+            preg_match_all('/([=~])([^=~]+)/', $match[2], $optionMatches, PREG_SET_ORDER);
             $questionText = trim($match[1]);
-            $answersRaw = explode('~', $match[2]);
             $options = [];
             $correctIndex = null;
     
-            foreach ($answersRaw as $index => $option) {
-                $option = trim($option);
-                if (str_starts_with($option, '=')) {
-                    $options[] = ltrim($option, '=');
-                    $correctIndex = $index;
-                } else {
-                    $options[] = $option;
+            foreach ($optionMatches as $i => $optMatch) {
+                $sign = $optMatch[1]; // = o ~
+                $text = trim($optMatch[2]);
+
+                $options[] = $text;
+
+                if ($sign === '=') {
+                    $correctIndex = $i;
                 }
             }
     
             if ($correctIndex === null || count($options) < 2) {
-                continue; // Skip malformed question
+                continue;
             }
     
-            // Crear pregunta
             $question = Question::create([
                 'quiz_id' => $quiz->id,
                 'text' => $questionText,
             ]);
     
-            // Crear opciones (debes tener una relación hasMany en el modelo Question)
             foreach ($options as $i => $optionText) {
                 $question->options()->create([
                     'text' => $optionText,
@@ -62,7 +58,7 @@ class QuestionController extends Controller
 
     public function showByQuiz(Quiz $quiz)
     {
-        $quiz->load('questions.options'); // Eager load para evitar consultas múltiples
+        $quiz->load('questions.options');
         return view('teacher.questions.show', compact('quiz'));
     }
 

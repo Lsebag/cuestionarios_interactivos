@@ -14,8 +14,9 @@ class Meeting extends Model
         'meeting_name',
         'access_code',
         'status',
-        'quiz_id',
         'user_id',
+        'quiz_id',
+        'current_question_id',
     ];
 
     public function quiz()
@@ -36,5 +37,10 @@ class Meeting extends Model
     public function students()
     {
         return $this->belongsToMany(User::class, 'participations')->withTimestamps()->withPivot('status');
+    }
+
+    public function currentQuestion()
+    {
+        return $this->belongsTo(Question::class, 'current_question_id');
     }
 }

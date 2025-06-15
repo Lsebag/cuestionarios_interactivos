@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Events\AnswerSubmitted;
 use App\Models\Participation;
 use Illuminate\Http\Request;
+use App\Models\Meeting;
 use App\Models\Answer;
 
 class AnswerController extends Controller
@@ -18,25 +19,45 @@ class AnswerController extends Controller
             'meeting_id' => 'required|exists:meetings,id',
         ]);
 
-        // Encontrar participación del estudiante en esa reunión
-        $participation = Participation::where('user_id', Auth::id())
-            ->where('meeting_id', $request->meeting_id)
-            ->firstOrFail();
+        $user = Auth::user();
+        $meeting = Meeting::with('quiz.questions')->findOrFail($request->meeting_id);
 
-        // Guardar o actualizar respuesta
-        $answer = Answer::updateOrCreate(
+        /** ---------- 1. asegura participación ---------- */
+        $participation = Participation::firstOrCreate([
+            'user_id'    => $user->id,
+            'meeting_id' => $meeting->id,
+        ]);
+
+        // Rechazar si la pregunta enviada no es la actual
+        if ($meeting->current_question_id != $request->question_id) {
+            return back()->with('error', 'La pregunta ya no está activa. Espera que el profesor avance.');
+        }
+
+        /** ---------- 2. guarda la respuesta si no existe ---------- */
+        Answer::firstOrCreate(
             [
-                'participation_id' => $participation->id,
-                'question_id' => $request->question_id,
+                    'participation_id' => $participation->id,
+                    'question_id'      => $request->question_id,
             ],
-            [
-                'option_id' => $request->option_id,
-            ]
+            ['option_id' => $request->option_id]
         );
 
-        // Emitir evento
-        broadcast(new AnswerSubmitted($answer))->toOthers();
+        /** ---------- 3. calcula la siguiente pregunta ---------- */
+        $questions    = $meeting->quiz->questions()->orderBy('id')->get();
+        $currentIndex = $questions->search(fn ($q) => $q->id == $request->question_id);
+        $nextQuestion = $questions->get($currentIndex + 1);   // null si era la última
 
-        return response()->json(['status' => 'ok']);
+        if ($nextQuestion) {
+            // mueve el puntero
+            $meeting->update(['current_question_id' => $nextQuestion->id]);
+        } else {
+            // no hay más → se termina la sesión
+            $meeting->update(['status' => 'finished', 'current_question_id' => null]);
+            return redirect()
+                ->route('student.results', $meeting->id)
+                ->with('success', '¡Cuestionario finalizado! Aquí tienes tus resultados.');
+        }
+
+        return back()->with('success', 'Respuesta guardada correctamente.');
     }
 }

@@ -20,38 +20,52 @@
             @if ($meeting->status === 'waiting')
                 <form action="{{ route('teacher.meetings.start', $meeting) }}" method="POST">
                     @csrf
-                    <button class="btn btn-primary mt-4">Iniciar Sesión</button>
+                    <button class="btn btn-primary mt-4">Comenzar Sesión</button>
                 </form>
             @else
                 <p class="mt-4 text-green-600">Sesión en curso</p>
-                <div class="mt-6">
-                    <h3 class="text-lg font-bold mb-2">Preguntas del cuestionario</h3>
 
-                    @foreach ($meeting->quiz->questions as $question)
-                        <div class="mb-4">
-                            <p class="font-semibold">{{ $question->text }}</p>
-                            <ul class="list-disc ml-5">
-                                @foreach ($question->options as $option)
-                                    <li>{{ $option->text }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endforeach
-                </div>
+                @php
+                    $current = $meeting->currentQuestion;
+                    $allQuestions = $meeting->quiz->questions;
+                    $currentIndex = $allQuestions->search(fn($q) => $q->id === optional($current)->id);
+                    $nextQuestion = $allQuestions->get($currentIndex + 1);
+                @endphp
+
+                @if ($current)
+                    <div class="mt-6 bg-gray-100 p-6 rounded-lg shadow">
+                        <h3 class="text-xl font-bold mb-4">Pregunta actual</h3>
+                        <p class="text-lg font-semibold">{{ $current->text }}</p>
+
+                        <ul class="mt-4 space-y-2">
+                            @foreach ($current->options as $i => $option)
+                                <li>
+                                    <span class="font-bold">{{ chr(65 + $i) }}.</span> {{ $option->text }}
+                                </li>
+                            @endforeach
+                        </ul>
+
+                        @if ($nextQuestion)
+                            <form method="POST" action="{{ route('teacher.show.question', [$meeting, $nextQuestion]) }}" class="mt-6">
+                                @csrf
+                                <button class="bg-blue-600 hover:bg-blue-700 text-black font-semibold px-4 py-2 rounded shadow">
+                                    Siguiente pregunta
+                                </button>
+                            </form>
+                        @else
+                            <p class="mt-6 text-gray-600 italic">No hay más preguntas.</p>
+                            <form method="POST" action="{{ route('teacher.finish.meeting', $meeting) }}" class="mt-6">
+                                @csrf
+                                <button class="bg-green-600 hover:bg-green-700 text-black font-bold px-4 py-2 rounded shadow">
+                                    Visualizar resultados
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                @else
+                    <p class="mt-4 text-red-500 font-semibold">No hay pregunta actual asignada.</p>
+                @endif
             @endif
         </div>
     </div>
-
-    <script>
-        Echo.channel('meeting.{{ $meeting->id }}')
-            .listen('StudentJoined', (e) => {
-                const ul = document.getElementById('participants-list');
-                const li = document.createElement('li');
-                li.textContent = e.user.name;
-                ul.appendChild(li);
-            })
-            .listen('MeetingStarted', (e) => {
-                document.getElementById('status').innerText = 'started';
-            });
-    </script>
 </x-app-layout>

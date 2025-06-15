@@ -37,14 +37,11 @@ class QuizController extends Controller
 
     public function edit(Quiz $quiz)
     {
-        // $this->authorize('update', $quiz); // Asegúrate de tener la policy
         return view('teacher.quizzes.edit', compact('quiz'));
     }
 
     public function update(Request $request, Quiz $quiz)
     {
-        // $this->authorize('update', $quiz);
-
         $request->validate([
             'title' => 'required|max:255',
             'description' => 'nullable|string',

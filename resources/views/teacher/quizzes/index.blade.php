@@ -15,9 +15,18 @@
                     <p class="text-gray-600">{{ $quiz->description }}</p>
                     <div class="mt-3">
                         <div class="mt-3">
-                            <a href="{{ route('teacher.quizzes.edit', $quiz) }}" class="btn btn-warning btn-sm">Editar</a>
-                            <a href="{{ route('teacher.questions.import', $quiz) }}" class="btn btn-info btn-sm">Cargar Preguntas</a>
-                            <a href="{{ route('teacher.questions.showByQuiz', $quiz) }}" class="btn btn-outline-primary btn-sm">Ver Preguntas</a>
+                        <a href="{{ route('teacher.quizzes.edit', $quiz) }}"
+                           class="px-4 py-2 border border-blue-500 text-blue-500 rounded hover:bg-blue-500 hover:text-white transition">
+                            Editar
+                        </a>
+                        <a href="{{ route('teacher.questions.import', $quiz) }}"
+                           class="px-4 py-2 border border-blue-500 text-blue-500 rounded hover:bg-blue-500 hover:text-white transition">
+                            Cargar Preguntas
+                        </a>
+                        <a href="{{ route('teacher.questions.showByQuiz', $quiz) }}"
+                           class="px-4 py-2 border border-blue-500 text-blue-500 rounded hover:bg-blue-500 hover:text-white transition">
+                            Ver Preguntas
+                        </a>
                         </div>                        
                     </div>
                 </div>

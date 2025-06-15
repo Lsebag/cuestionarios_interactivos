@@ -24,12 +24,10 @@ class StudentController extends Controller
 
     public function showMeetings()
     {
-        // $meetings = auth()->user()->meetings()->with('quiz')->get();
         $meetings = Meeting::whereHas('students', function ($query) {
             $query->where('user_id', Auth::id());
         })->with('quiz')->get();
 
         return view('student.meetings.index', compact('meetings'));
     }
-    
 }

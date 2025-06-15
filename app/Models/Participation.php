@@ -17,4 +17,9 @@ class Participation extends Model
     {
         return $this->belongsTo(Meeting::class);
     }
+
+    public function answers()
+    {
+        return $this->hasMany(Answer::class);
+    }
 }

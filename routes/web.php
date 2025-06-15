@@ -52,11 +52,16 @@ Route::middleware(['auth', IsTeacher::class])->prefix('teacher')->group(function
     Route::post('/teacher/meetings', [MeetingController::class, 'store'])->name('teacher.meetings.store');
     Route::post('/meetings/{meeting}/start', [MeetingController::class, 'start'])->name('teacher.meetings.start');
 
+    // 5. Mostrar cada pregunta
+    Route::post('/teacher/meetings/{meeting}/question/{question}', [TeacherController::class, 'showQuestion'])->name('teacher.show.question');
+
+    Route::post('/teacher/meetings/{meeting}/finish', [TeacherController::class, 'finishMeeting'])->name('teacher.finish.meeting');
+    Route::get('/teacher/meetings/{meeting}/results', [TeacherController::class, 'showResults'])->name('teacher.results');
 });
 
 Route::get('/student/dashboard', [StudentController::class, 'index'])->name('student.dashboard');
 Route::get('/student/meetings', [StudentController::class, 'showMeetings'])->name('student.meetings');
-Route::post('/answer', [AnswerController::class, 'store'])->name('answer.store');
+Route::post('/student/answer', [AnswerController::class, 'store'])->name('student.answer');
 
 // Rutas unirse a sesión
 // 1. Mostrar el formulario para ingresar código de sesión
@@ -73,5 +78,8 @@ Route::get('/student/meetings/play/{access_code}', [MeetingController::class, 'p
     ->middleware('auth')
     ->name('student.meetings.play');
 
+Route::get('/student/meetings/{meeting}/results', [MeetingController::class, 'showStudentResults'])
+    ->middleware('auth')
+    ->name('student.results');
 
 require __DIR__.'/auth.php';
