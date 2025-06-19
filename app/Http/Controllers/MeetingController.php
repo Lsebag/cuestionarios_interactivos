@@ -136,4 +136,20 @@ class MeetingController extends Controller
             'participation' => $participation,
         ]);
     }
+
+    public function next(Meeting $meeting)
+    {
+        $questions    = $meeting->quiz->questions()->orderBy('id')->get();
+        $currentIndex = $questions->search(fn($q) => $q->id == $meeting->current_question_id);
+
+        $nextQuestion = $questions->get($currentIndex + 1);
+
+        if ($nextQuestion) {
+            $meeting->update(['current_question_id' => $nextQuestion->id]);
+        } else {
+            $meeting->update(['status' => 'finished', 'current_question_id' => null]);
+        }
+
+        return back();
+    }
 }

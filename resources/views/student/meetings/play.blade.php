@@ -27,19 +27,19 @@
 
         @if ($question)
             <div class="grid grid-cols-2 gap-6">
-                @foreach ($question->options as $index => $option)
-                    @php $letter = chr(65 + $index); @endphp
-                    <form method="POST" action="{{ route('student.answer') }}">
-                        @csrf
-                        <input type="hidden" name="question_id" value="{{ $question->id }}">
-                        <input type="hidden" name="option_id" value="{{ $option->id }}">
-                        <input type="hidden" name="meeting_id" value="{{ $meeting->id }}">
-
-                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-black font-semibold py-6 px-4 rounded-2xl text-xl shadow-lg">
-                            Opción {{ $letter }}
-                        </button>
-                    </form>
-                @endforeach
+            @php $letters = ['A','B','C','D']; @endphp
+            @foreach ($letters as $index => $letter)
+                <form method="POST" action="{{ route('student.answer') }}">
+                    @csrf
+                    <input type="hidden" name="meeting_id" value="{{ $meeting->id }}">
+                    <input type="hidden" name="choice" value="{{ $index }}"> {{-- 0‑3 --}}
+                    <button
+                        type="submit"
+                        class="w-full bg-indigo-600 hover:bg-indigo-700 font-semibold py-6 px-4 rounded-2xl text-xl shadow-lg">
+                        Opción {{ $letter }}
+                    </button>
+                </form>
+            @endforeach
             </div>
         @else
             <div class="text-center text-red-500 font-semibold mt-6">

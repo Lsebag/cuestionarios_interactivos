@@ -11,53 +11,46 @@ use App\Models\Answer;
 
 class AnswerController extends Controller
 {
-    public function store(Request $request)
-    {
-        $request->validate([
-            'question_id' => 'required|exists:questions,id',
-            'option_id' => 'required|exists:options,id',
-            'meeting_id' => 'required|exists:meetings,id',
-        ]);
+public function store(Request $request)
+{
+    $request->validate([
+        'meeting_id' => 'required|exists:meetings,id',
+        'choice'     => 'required|integer|between:0,3', // 0‑3
+    ]);
 
-        $user = Auth::user();
-        $meeting = Meeting::with('quiz.questions')->findOrFail($request->meeting_id);
+    $user     = Auth::user();
+    $meeting  = Meeting::with('quiz.questions.options')->findOrFail($request->meeting_id);
 
-        /** ---------- 1. asegura participación ---------- */
-        $participation = Participation::firstOrCreate([
-            'user_id'    => $user->id,
-            'meeting_id' => $meeting->id,
-        ]);
+    /** 1. participación */
+    $participation = Participation::firstOrCreate([
+        'user_id'    => $user->id,
+        'meeting_id' => $meeting->id,
+    ]);
 
-        // Rechazar si la pregunta enviada no es la actual
-        if ($meeting->current_question_id != $request->question_id) {
-            return back()->with('error', 'La pregunta ya no está activa. Espera que el profesor avance.');
-        }
+    /** 2. pregunta activa */
+    $question = $meeting->currentQuestion;
 
-        /** ---------- 2. guarda la respuesta si no existe ---------- */
-        Answer::firstOrCreate(
-            [
-                    'participation_id' => $participation->id,
-                    'question_id'      => $request->question_id,
-            ],
-            ['option_id' => $request->option_id]
-        );
-
-        /** ---------- 3. calcula la siguiente pregunta ---------- */
-        $questions    = $meeting->quiz->questions()->orderBy('id')->get();
-        $currentIndex = $questions->search(fn ($q) => $q->id == $request->question_id);
-        $nextQuestion = $questions->get($currentIndex + 1);   // null si era la última
-
-        if ($nextQuestion) {
-            // mueve el puntero
-            $meeting->update(['current_question_id' => $nextQuestion->id]);
-        } else {
-            // no hay más → se termina la sesión
-            $meeting->update(['status' => 'finished', 'current_question_id' => null]);
-            return redirect()
-                ->route('student.results', $meeting->id)
-                ->with('success', '¡Cuestionario finalizado! Aquí tienes tus resultados.');
-        }
-
-        return back()->with('success', 'Respuesta guardada correctamente.');
+    if (!$question) {
+        return back()->with('error', 'No hay pregunta activa.');
     }
+
+    /** 3. opción elegida (índice 0‑3) */
+    $option = $question->options()->orderBy('id')->skip($request->choice)->first();
+
+    if (!$option) {
+        return back()->with('error', 'Opción inválida.');
+    }
+
+    /** 4. guardar / actualizar respuesta */
+    Answer::updateOrCreate(
+        [
+            'participation_id' => $participation->id,
+            'question_id'      => $question->id,
+        ],
+        ['option_id' => $option->id]
+    );
+
+    return back()->with('success', 'Respuesta registrada.');
+}
+
 }

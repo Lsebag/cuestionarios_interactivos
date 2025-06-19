@@ -46,11 +46,9 @@
                         </ul>
 
                         @if ($nextQuestion)
-                            <form method="POST" action="{{ route('teacher.show.question', [$meeting, $nextQuestion]) }}" class="mt-6">
+                            <form method="POST" action="{{ route('meeting.next', $meeting) }}">
                                 @csrf
-                                <button class="bg-blue-600 hover:bg-blue-700 text-black font-semibold px-4 py-2 rounded shadow">
-                                    Siguiente pregunta
-                                </button>
+                                <button class="btn btn-primary">Siguiente pregunta</button>
                             </form>
                         @else
                             <p class="mt-6 text-gray-600 italic">No hay más preguntas.</p>

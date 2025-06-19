@@ -57,6 +57,9 @@ Route::middleware(['auth', IsTeacher::class])->prefix('teacher')->group(function
 
     Route::post('/teacher/meetings/{meeting}/finish', [TeacherController::class, 'finishMeeting'])->name('teacher.finish.meeting');
     Route::get('/teacher/meetings/{meeting}/results', [TeacherController::class, 'showResults'])->name('teacher.results');
+
+    Route::post('/meetings/{meeting}/next', [MeetingController::class, 'next'])
+      ->name('meeting.next');
 });
 
 Route::get('/student/dashboard', [StudentController::class, 'index'])->name('student.dashboard');
